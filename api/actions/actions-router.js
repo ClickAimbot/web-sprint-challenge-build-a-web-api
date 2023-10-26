@@ -49,27 +49,26 @@ router.post('/', (req, res) => {
         });
 });
 
-router.put('/:id', (req, res) => {
-    const changes = req.body;
-
-    if (!changes.project_id || !changes.description || !changes.notes) {
+router.put('/:id', async (req, res) => {
+    const { project_id, description, notes, completed } = req.body;
+    if (!project_id || !description || !notes || !completed) {
         res.status(400).json({ message: 'Project ID, description, and notes are required' })
-    }
-
-    Actions.update(req.params.id, changes)
-        .then(action => {
-            if (action) {
-                res.status(200).json(action)
-            } else {
+    } else {
+        try{
+            const action = await Actions.get(req.params.id)
+            if (!action) {
                 res.status(404).json({ message: 'Action not found' })
+            } else {
+                const updatedAction = await Actions.update(req.params.id, req.body)
+                res.status(200).json(updatedAction)
             }
-        })
-        .catch(err => {
+        } catch (err) {
             res.status(500).json({ message: 'Failed to update action',
             err: err.message,
             stack: err.stack,
             });
-        });
+        }
+    }
 });
 
 router.delete('/:id', (req, res) => {
