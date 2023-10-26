@@ -56,28 +56,23 @@ router.post('/', (req, res) => {
 
 router.put('/:id', async (req, res) => {
     const { name, description, completed } = req.body;
-    
-    // Check if required fields are missing
     if (!name || !description || !completed) {
         return res.status(400).json({ message: 'Project name and description are required' });
-    }
-
-    try {
-        const project = await Projects.get(req.params.id);
-        if (!project) {
-            return res.status(404).json({ message: 'Project not found' });
-        }
-
-        // Update the project with the provided data
-        await Projects.update(req.params.id, { name, description, completed });
-
-        // Fetch the updated project
-        const updatedProject = await Projects.get(req.params.id);
-
-        // Respond with the updated project object
-        res.json(updatedProject);
-    } catch (err) {
-        res.status(500).json({ message: 'Failed to update project', err: err.message, stack: err.stack });
+    } else {
+        try {
+            const project = await Projects.get(req.params.id);
+            if (!project) {
+                return res.status(404).json({ message: 'Project not found' });
+            } else {
+                const updatedProject = await Projects.update(req.params.id, req.body);
+                res.status(200).json(updatedProject);
+            }    
+        } catch (err) {
+            res.status(500).json({ message: 'Failed to update project', 
+            err: err.message, 
+            stack: err.stack, 
+            });
+        }    
     }
 });
 
