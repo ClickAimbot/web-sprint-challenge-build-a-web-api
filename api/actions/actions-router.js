@@ -1,6 +1,11 @@
 const express = require('express');
 const Actions = require('./actions-model.js');
 const router = express.Router();
+const {
+    validateAction,
+    validateActionId,
+} = require('./actions-middlware.js');
+
 
 router.get('/', (req, res) => {
     Actions.get()
@@ -49,25 +54,17 @@ router.post('/', (req, res) => {
         });
 });
 
-router.put('/:id', async (req, res) => {
-    const { project_id, description, notes, completed } = req.body;
-    if (!project_id || !description || !notes || !completed) {
-        res.status(400).json({ message: 'Project ID, description, and notes are required' })
-    } else {
-        try{
-            const action = await Actions.get(req.params.id)
-            if (!action) {
-                return res.status(404).json({ message: 'Action not found' })
-            } else {
-                const updatedAction = await Actions.update(req.params.id, req.body)
-                res.status(200).json(updatedAction)
-            }
-        } catch (err) {
-            res.status(500).json({ message: 'Failed to update action',
-            err: err.message,
-            stack: err.stack,
-            });
-        }
+router.put('/:id', validateActionId, validateAction, async (req, res) => {
+    console.log(req.body)
+    try {
+        const updatedAction = await Actions.update(req.params.id, req.body)
+        res.status(200).json(updatedAction)
+        console.log(updatedAction)
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to update action',
+        err: err.message,
+        stack: err.stack,
+        });
     }
 });
 
