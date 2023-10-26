@@ -33,6 +33,10 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
+    const {project_id, description, notes} = req.body;
+    if (!project_id || !description || !notes) {
+        res.status(400).json({ message: 'Project ID, description, and notes are required' })
+    }
     Actions.insert(req.body)
         .then(action => {
             res.status(201).json(action)

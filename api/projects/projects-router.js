@@ -33,7 +33,11 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-    Projects.insert(req.body)
+    const {name, description} = req.body;
+    if (!name || !description) {
+        res.status(400).json({ message: 'Project name and description are required' })
+    } else {
+        Projects.insert(req.body)
         .then(project => {
             if (project) {
                 res.status(201).json(project)
@@ -47,24 +51,30 @@ router.post('/', (req, res) => {
             stack: err.stack,
             });
         });
+    }
 });
 
-router.put('/:id', (req, res) => {
-    const changes = req.body;
-    Projects.update(req.params.id, changes)
-        .then(project => {
-            if (project) {
-                res.status(200).json(project)
+router.put('/:id', async (req, res) => {
+    const {name, description, completed} = req.body;
+    if (!name || !description || !completed) {
+        res.status(400).json({ message: 'Project name and description are required' })
+    } else {
+        try {
+            const project = await Projects.get(req.params.id);
+            if (!project) {
+                res.status(404).json({ message: 'Project not found' })
             } else {
-                res.status(400).json({ message: 'Project not found' })
+                await Projects.update(req.params.id, req.body);
+                const updatedProject = await Projects.get(req.params.id);
+                res.json(updatedProject)
             }
-        })
-        .catch(err => {
+        } catch (err) {
             res.status(500).json({ message: 'Failed to update project',
             err: err.message,
             stack: err.stack,
             });
-        });
+        }
+    }
 });
 
 router.delete('/:id', (req, res) => {
