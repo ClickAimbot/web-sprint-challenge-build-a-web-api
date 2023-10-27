@@ -54,19 +54,17 @@ router.post('/', (req, res) => {
         });
 });
 
-router.put('/:id', validateActionId, validateAction, async (req, res) => {
-    console.log(req.body)
+router.put('/:id', validateAction, validateActionId, async (req, res, next) => {
     try {
-        const updatedAction = await Actions.update(req.params.id, req.body)
-        res.status(200).json(updatedAction)
-        console.log(updatedAction)
+        const updatedAction = await Actions.update(req.params.id, req.body);
+        if (updatedAction) {
+            return res.status(200).json(updatedAction);
+        } 
     } catch (err) {
-        res.status(500).json({ message: 'Failed to update action',
-        err: err.message,
-        stack: err.stack,
-        });
+        return next(); 
     }
 });
+
 
 router.delete('/:id', (req, res) => {
     Actions.remove(req.params.id)
