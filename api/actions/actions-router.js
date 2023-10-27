@@ -37,14 +37,15 @@ router.get('/:id', (req, res) => {
         });
 });
 
-router.post('/', (req, res) => {
-    const {project_id, description, notes} = req.body;
-    if (!project_id || !description || !notes) {
-        res.status(400).json({ message: 'Project ID, description, and notes are required' })
-    }
+router.post('/', validateAction, (req, res) => {
+    // const {project_id, description, notes} = req.body;
+    // if (!project_id || !description || !notes) {
+    //     res.status(400).json({ message: 'Project ID, description, and notes are required' })
+    // }
     Actions.insert(req.body)
         .then(action => {
             res.status(201).json(action)
+            console.log(action)
         })
         .catch(err => {
             res.status(500).json({ message: 'Failed to create new action',
@@ -54,14 +55,12 @@ router.post('/', (req, res) => {
         });
 });
 
-router.put('/:id', validateAction, validateActionId, async (req, res, next) => {
+router.put('/:id', validateActionId, validateAction, async (req, res, next) => {
     try {
         const updatedAction = await Actions.update(req.params.id, req.body);
-        if (updatedAction) {
-            return res.status(200).json(updatedAction);
-        } 
+        res.status(200).json(updatedAction); 
     } catch (err) {
-        return next(); 
+        next(); 
     }
 });
 

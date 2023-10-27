@@ -4,16 +4,12 @@ function validateAction(req, res, next) {
     const { project_id, description, notes, completed } = req.body;
     if (!project_id) {
        return res.status(400).json({ message: 'Project ID is required' });
-       console.log("action id")
     } else if (!description) {
        return res.status(400).json({ message: 'Description is required' });
-       console.log("action description")
     } else if (!notes) {
        return res.status(400).json({ message: 'Notes are required' });
-        console.log("action notes")
     } else if (completed === undefined || completed === null) {
        return res.status(400).json({ message: 'Completed status is required' });
-        console.log("action completed")
     } else {
         next();
     }
